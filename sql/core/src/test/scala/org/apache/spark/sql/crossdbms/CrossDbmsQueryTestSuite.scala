@@ -23,7 +23,7 @@ import java.util.Locale
 import scala.util.control.NonFatal
 
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.SQLQueryTestSuite
+import org.apache.spark.sql.{SparkSession, SQLQueryTestSuite}
 import org.apache.spark.sql.catalyst.util.{fileToString, stringToFile}
 import org.apache.spark.util.ArrayImplicits.SparkArrayOps
 
@@ -230,6 +230,23 @@ abstract class CrossDbmsQueryTestSuite extends SQLQueryTestSuite with Logging {
       val testCaseName = absPath.stripPrefix(customInputFilePath).stripPrefix(File.separator)
       RegularTestCase(testCaseName, absPath, resultFile) :: Nil
     }.sortBy(_.name)
+  }
+
+  override def createTestTables(session: SparkSession): Unit = {
+    super.createTestTables(session)
+    if (regenerateGoldenFiles) {
+      val postgresRunner = getConnection(None)
+      postgresRunner.loadData(session
+        .read
+        .parquet(testFile("test-data/subquery/bonus.parquet")), "subquery_bonus")
+      postgresRunner.loadData(session
+        .read
+        .parquet(testFile("test-data/subquery/emp.parquet")), "subquery_emp")
+      postgresRunner.loadData(session
+        .read
+        .parquet(testFile("test-data/subquery/dept.parquet")), "subquery_dept")
+      postgresRunner.cleanUp()
+    }
   }
 }
 

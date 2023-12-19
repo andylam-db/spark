@@ -810,6 +810,27 @@ class SQLQueryTestSuite extends QueryTest with SharedSparkSession with SQLHelper
       .write
       .format("parquet")
       .saveAsTable("tenk1")
+
+    session
+      .read
+      .parquet(testFile("test-data/subquery/bonus.parquet"))
+      .write
+      .format("parquet")
+      .saveAsTable("subquery_bonus")
+
+    session
+      .read
+      .parquet(testFile("test-data/subquery/emp.parquet"))
+      .write
+      .format("parquet")
+      .saveAsTable("subquery_emp")
+
+    session
+      .read
+      .parquet(testFile("test-data/subquery/dept.parquet"))
+      .write
+      .format("parquet")
+      .saveAsTable("subquery_dept")
   }
 
   protected def removeTestTables(session: SparkSession): Unit = {

@@ -17,6 +17,8 @@
 
 package org.apache.spark.sql.crossdbms
 
+import org.apache.spark.sql.DataFrame
+
 /**
  * Trait for classes that can run SQL queries for testing. This is specifically used as a wrapper
  * around a connection to a system that can run SQL queries, to run queries from
@@ -31,6 +33,11 @@ trait SQLQueryTestRunner {
   def runQuery(query: String): Seq[String]
 
   /**
+   * Load data from a Dataframe into the system.
+   */
+  def loadData(df: DataFrame, tableName: String): Unit
+
+  /**
    * Perform clean up, such as dropping tables and closing the database connection.
    */
   def cleanUp(): Unit
@@ -43,6 +50,8 @@ private[sql] case class JdbcSQLQueryTestRunner(connection: JdbcConnection)
   extends SQLQueryTestRunner {
 
   def runQuery(query: String): Seq[String] = connection.runQuery(query)
+
+  def loadData(df: DataFrame, tableName: String): Unit = connection.loadData(df, tableName)
 
   def cleanUp(): Unit = connection.close()
 }
